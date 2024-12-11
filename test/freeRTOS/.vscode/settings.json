@@ -1,0 +1,6 @@
+{
+	"files.associations": {
+		"*.pleal": "lua",
+		"*.old": "cpp"
+	}
+}

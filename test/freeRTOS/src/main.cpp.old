@@ -1,0 +1,100 @@
+#include <Arduino.h>
+#include <Arduino_FreeRTOS.h>
+#include <DisLib.h>
+#include <Debounce.h>
+#include <semphr.h>
+
+const int TRIG_PIN = 4;
+const int ECHO_PIN = 5;
+const int BUTTON1 = 6;
+const int YELLOW_LED = A3;
+const int RED_LED = A2;
+
+DisLib dislib(TRIG_PIN, ECHO_PIN);
+float distance;
+
+SemaphoreHandle_t sButton2;
+void vButton2Handler() {
+	Serial.println("BUTTON1");
+}
+static Button button2(0, vButton2Handler);
+
+Button baButtons[] {
+	Button(0, vButton2Handler)
+};
+
+
+void vBlinkTask1(void *pvParameters) {
+	pinMode(YELLOW_LED, OUTPUT);
+	while (true) {
+		digitalWrite(YELLOW_LED, HIGH);
+		vTaskDelay(500 / portTICK_PERIOD_MS); // 500 ms
+		digitalWrite(YELLOW_LED, LOW);
+		vTaskDelay(500 / portTICK_PERIOD_MS); // 500 ms
+	}
+}
+void vBlinkTask2(void *pvParameters) {
+	while (true) {
+		
+		vTaskDelay(100 / portTICK_PERIOD_MS);
+		
+	}
+}
+void vGetDistance() {
+	while (true) {
+		taskENTER_CRITICAL();
+		distance = dislib.getDistance() * 10;
+		taskEXIT_CRITICAL();
+		vTaskDelay(30 / portTICK_PERIOD_MS);
+	}
+}
+
+void vButton2Interrupt() {
+	xSemaphoreGiveFromISR(sButton2, NULL);
+}
+void vButton2Debounce() {
+	while (true) {
+		//xSemaphoreTake(sButton2, portMAX_DELAY);
+		baButtons[0].update(digitalRead(BUTTON1));
+		vTaskDelay(5);
+	}
+}
+
+void vDebounceHandler() {
+	
+}
+
+
+void vTest() {
+	while (true) {
+		
+	}
+}
+
+
+
+void setup() {
+	while (!Serial);	Serial.println(BTN_DEBOUNCE_MILLIS);
+	Serial.println("Init start");
+	pinMode(BUTTON1, INPUT_PULLUP);
+	pinMode(BUTTON1, INPUT_PULLUP);
+	
+	
+	xTaskCreate(vButton2Debounce, "Button2Debounce", 128, NULL, 1, NULL);
+	
+	//xTaskCreate(vBlinkTask1, "Blink1", 128, NULL, 1, NULL);
+	//xTaskCreate(vBlinkTask2, "Blink2", 128, NULL, 1, NULL);
+	//xTaskCreate(vGetDistance, "GetDistance", 128, NULL, 1, NULL);
+	//xTaskCreate(vTest, "Test", 128, NULL, 1, NULL);
+	
+	
+	sButton2 = xSemaphoreCreateBinary();
+	if (sButton2 != NULL) {
+		attachInterrupt(digitalPinToInterrupt(BUTTON1), vButton2Interrupt, FALLING);
+  	}
+	Serial.println("Init done");
+}
+
+void loop() {
+	// Empty. FreeRTOS tasks handle everything.
+}

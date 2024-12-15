@@ -13,5 +13,27 @@ bool Button::bUpdate() {
 }
 
 bool Button::bUpdate(uint8_t uiState) {
+	unsigned long currentMillis = millis();
+	unsigned int debounceInterval = (uiState == BTN_PRESSED) ? _uiDebouncePushMillis : _uiDebounceReleaseMillis;
+
+	if (uiState != _uiLatestPoll) {
+		_uiDebounceStartTime = currentMillis;
+		_uiLatestPoll = uiState;
+	}
 	
+	
+
+	if (currentMillis - _uiDebounceStartTime >= debounceInterval) {
+		if (_uiStableState != uiState) {
+			_uiStableState = uiState;
+
+			if (_fnHandler) {
+				_fnHandler(uiState, _caName);
+			}
+
+			return true;
+		}
+	}
+
+	return false;
 }

@@ -14,8 +14,9 @@ DisLib dislib(TRIG_PIN, ECHO_PIN);
 float distance;
 
 SemaphoreHandle_t sButton2;
-void vButton2Handler() {
-	Serial.println("BUTTON1");
+void vButton2Handler(unsigned int uiState) {
+	Serial.print("BUTTON1: ");
+	Serial.println(uiState);
 }
 static Button button2(0, vButton2Handler);
 
@@ -56,7 +57,7 @@ void vButton2Debounce() {
 	while (true) {
 		//xSemaphoreTake(sButton2, portMAX_DELAY);
 		baButtons[0].update(digitalRead(BUTTON1));
-		vTaskDelay(5);
+		vTaskDelay(1);
 	}
 }
 

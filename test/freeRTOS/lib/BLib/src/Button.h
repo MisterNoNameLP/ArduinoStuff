@@ -9,7 +9,7 @@ constexpr unsigned int BTN_DEBOUNCE_RELEASE_MILLIS = 10;
 constexpr uint8_t BTN_PRESSED = 0;
 constexpr uint8_t BTN_OPEN = 1;
 
-typedef void (*handlerFunction_t)(bool bState, char* caName);
+typedef void (*handlerFunction_t)(uint8_t bState, char* caName);
 
 class Button {
 	public:
